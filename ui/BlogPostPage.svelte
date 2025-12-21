@@ -77,6 +77,7 @@
 	let postContentComponent = $state(data.postContent || null)
 	let loadingError = $state(null)
 	let isImporting = $state(false)
+	// eslint-disable-next-line svelte/prefer-writable-derived -- Needs to be mutated manually in loadContent function
 	let _contentLoaded = $state(false)
 	let copySuccess = $state(false)
 

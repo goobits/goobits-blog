@@ -46,6 +46,7 @@
 		isLoading = true
 		try {
 			const nextPage = currentPage + 1
+			// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Building query params for fetch, not reactive URL state
 			const params = new URLSearchParams({
 				page: nextPage.toString(),
 				limit: POSTS_PER_BATCH.toString(),

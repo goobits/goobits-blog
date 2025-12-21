@@ -66,6 +66,7 @@
 	let isOpen = $state(false)
 
 	// Current language
+	// eslint-disable-next-line svelte/prefer-writable-derived -- Needs to be mutated in handleLanguageChange
 	let currentLanguage = $state(currentLocale)
 
 	// Update current language when prop changes
