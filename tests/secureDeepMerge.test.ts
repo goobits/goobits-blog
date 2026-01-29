@@ -17,9 +17,9 @@ describe('secureDeepMerge', () => {
     })
 
     it('returns false for non-string keys', () => {
-      expect(isSafeKey(123)).toBe(false)
-      expect(isSafeKey(null)).toBe(false)
-      expect(isSafeKey(undefined)).toBe(false)
+      expect(isSafeKey(123 as unknown as string)).toBe(false)
+      expect(isSafeKey(null as unknown as string)).toBe(false)
+      expect(isSafeKey(undefined as unknown as string)).toBe(false)
     })
   })
 
@@ -53,29 +53,29 @@ describe('secureDeepMerge', () => {
           settings: { retry: 3 }
         }
       }
-      const result = secureDeepMerge(target, source)
+      const result = secureDeepMerge(target, source) as typeof target
 
       expect(result.config.theme).toBe('dark')
       expect(result.config.settings.timeout).toBe(100)
-      expect(result.config.settings.retry).toBe(3)
+      expect((result.config.settings as { timeout: number; retry: number }).retry).toBe(3)
     })
 
     it('replaces arrays instead of merging them', () => {
       const target = { arr: [1, 2, 3] }
       const source = { arr: [4, 5] }
-      const result = secureDeepMerge(target, source)
+      const result = secureDeepMerge(target, source) as typeof target
 
       expect(result.arr).toEqual([4, 5])
     })
 
     it('prevents __proto__ pollution', () => {
       const target = {}
-      const maliciousSource = JSON.parse('{"__proto__": {"polluted": true}}')
-      const result = secureDeepMerge(target, maliciousSource)
+      const maliciousSource = JSON.parse('{"__proto__": {"polluted": true}}') as unknown as Record<string, unknown>
+      const result = secureDeepMerge(target, maliciousSource) as Record<string, unknown>
 
       // The __proto__ key should be skipped
-      expect(result.polluted).toBeUndefined()
-      expect({}.polluted).toBeUndefined()
+      expect(result['polluted']).toBeUndefined()
+      expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
     })
 
     it('prevents constructor pollution', () => {
@@ -90,10 +90,10 @@ describe('secureDeepMerge', () => {
     it('prevents prototype pollution', () => {
       const target = {}
       const maliciousSource = { prototype: { polluted: true } }
-      const result = secureDeepMerge(target, maliciousSource)
+      const result = secureDeepMerge(target, maliciousSource) as Record<string, unknown>
 
       // The prototype key should be skipped
-      expect(result.prototype).toBeUndefined()
+      expect(result['prototype']).toBeUndefined()
     })
 
     it('handles null/undefined sources gracefully', () => {

@@ -5,8 +5,8 @@ describe('readTimeUtils', () => {
   describe('calculateReadTime', () => {
     it('returns default time for empty content', () => {
       expect(calculateReadTime('')).toBe(DEFAULT_READ_TIME_CONFIG.defaultTime)
-      expect(calculateReadTime(null)).toBe(DEFAULT_READ_TIME_CONFIG.defaultTime)
-      expect(calculateReadTime(undefined)).toBe(DEFAULT_READ_TIME_CONFIG.defaultTime)
+      expect(calculateReadTime(null as unknown as string)).toBe(DEFAULT_READ_TIME_CONFIG.defaultTime)
+      expect(calculateReadTime(undefined as unknown as string)).toBe(DEFAULT_READ_TIME_CONFIG.defaultTime)
     })
 
     it('calculates read time based on word count', () => {

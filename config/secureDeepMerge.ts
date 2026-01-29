@@ -7,16 +7,26 @@ import { createLogger } from '../utils/logger.js'
 
 const logger = createLogger('SecureDeepMerge')
 
+/** Type for a plain object with string keys */
+export type PlainObject = Record<string, unknown>
+
+/**
+ * Type guard to check if a value is a plain object
+ */
+function isPlainObject(value: unknown): value is PlainObject {
+	return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
 /**
  * Checks if a key is safe to use in object merging/access
  * Prevents __proto__, constructor, and other dangerous property names
  *
- * @param {string} key - Object key to check
- * @returns {boolean} True if safe, false if potentially dangerous
+ * @param key - Object key to check
+ * @returns True if safe, false if potentially dangerous
  */
-export function isSafeKey(key) {
+export function isSafeKey(key: string): boolean {
 	// List of known dangerous property names
-	const dangerousKeys = [
+	const dangerousKeys: readonly string[] = [
 		'__proto__',
 		'constructor',
 		'prototype'
@@ -28,16 +38,16 @@ export function isSafeKey(key) {
 /**
  * Secure deep merge that prevents prototype pollution
  *
- * @param {Object} target - Target object
- * @param {Object} source - Source object to merge in
- * @returns {Object} Merged object with only safe keys
+ * @param target - Target object
+ * @param source - Source object to merge in
+ * @returns Merged object with only safe keys
  */
-export function secureDeepMerge(target, source) {
+export function secureDeepMerge(target: PlainObject, source: unknown): PlainObject {
 	// Create a new object to avoid mutating the target
-	const result = { ...target }
+	const result: PlainObject = { ...target }
 
-	// Only merge if both are objects
-	if (source && typeof source === 'object' && !Array.isArray(source)) {
+	// Only merge if source is an object
+	if (isPlainObject(source)) {
 		// Iterate using Object.keys to only access own properties
 		Object.keys(source).forEach(key => {
 			// Skip potentially dangerous keys
@@ -46,11 +56,13 @@ export function secureDeepMerge(target, source) {
 				return
 			}
 
-			const sourceValue = source[key]
+			const sourceValue: unknown = source[key]
+			const targetValue: unknown = result[key]
 
 			// If property is an object, recursively merge
-			if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
-				result[key] = secureDeepMerge(result[key] || {}, sourceValue)
+			if (isPlainObject(sourceValue)) {
+				const targetObj: PlainObject = isPlainObject(targetValue) ? targetValue : {}
+				result[key] = secureDeepMerge(targetObj, sourceValue)
 			} else {
 				// For primitive values or arrays, just copy
 				result[key] = sourceValue

@@ -45,13 +45,13 @@ describe('classUtils', () => {
     })
 
     it('filters out empty/falsy modifiers', () => {
-      expect(bemClasses('goo__card', { modifiers: ['', null, 'valid', undefined] }))
+      expect(bemClasses('goo__card', { modifiers: ['', null as unknown as string, 'valid', undefined as unknown as string] }))
         .toBe('goo__card goo__card--valid')
     })
 
     it('throws TypeError for non-string block', () => {
-      expect(() => bemClasses(123)).toThrow(TypeError)
-      expect(() => bemClasses(null)).toThrow(TypeError)
+      expect(() => bemClasses(123 as unknown as string)).toThrow(TypeError)
+      expect(() => bemClasses(null as unknown as string)).toThrow(TypeError)
     })
   })
 
@@ -77,7 +77,7 @@ describe('classUtils', () => {
     })
 
     it('throws TypeError for non-string block', () => {
-      expect(() => dynamicClasses(null)).toThrow(TypeError)
+      expect(() => dynamicClasses(null as unknown as string)).toThrow(TypeError)
     })
   })
 
@@ -94,22 +94,22 @@ describe('classUtils', () => {
 
     it('returns empty string for falsy values', () => {
       expect(propertyModifier('goo__card', 'size', '')).toBe('')
-      expect(propertyModifier('goo__card', 'size', null)).toBe('')
-      expect(propertyModifier('goo__card', 'size', undefined)).toBe('')
+      expect(propertyModifier('goo__card', 'size', null as unknown as string)).toBe('')
+      expect(propertyModifier('goo__card', 'size', undefined as unknown as string)).toBe('')
     })
 
     it('throws TypeError for non-string block or property', () => {
-      expect(() => propertyModifier(123, 'size', 'large')).toThrow(TypeError)
-      expect(() => propertyModifier('goo__card', 123, 'large')).toThrow(TypeError)
+      expect(() => propertyModifier(123 as unknown as string, 'size', 'large')).toThrow(TypeError)
+      expect(() => propertyModifier('goo__card', 123 as unknown as string, 'large')).toThrow(TypeError)
     })
   })
 
   describe('ClassNames', () => {
     it('exports standard component class names', () => {
-      expect(ClassNames.blogCard).toBe('goo__card')
-      expect(ClassNames.postList).toBe('goo__post-list')
-      expect(ClassNames.tags).toBe('goo__tags')
-      expect(ClassNames.categories).toBe('goo__categories')
+      expect(ClassNames['blogCard']).toBe('goo__card')
+      expect(ClassNames['postList']).toBe('goo__post-list')
+      expect(ClassNames['tags']).toBe('goo__tags')
+      expect(ClassNames['categories']).toBe('goo__categories')
     })
   })
 })

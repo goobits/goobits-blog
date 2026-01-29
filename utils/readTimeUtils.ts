@@ -1,4 +1,4 @@
-import { blogConfig } from '../config.js'
+import { blogConfig } from '../config/index.js'
 import { createLogger } from './logger.js'
 
 const logger = createLogger('ReadTimeUtils')
@@ -6,8 +6,40 @@ const logger = createLogger('ReadTimeUtils')
 // Module name for error context
 const MODULE_NAME = 'ReadTimeUtils'
 
+// Read time configuration interface
+export interface ReadTimeConfig {
+	wordsPerMinute: number
+	defaultTime: number
+	minTimeForLongArticle: number
+	minTimeForVeryLongArticle: number
+	longArticleThreshold: number
+	veryLongArticleThreshold: number
+	headingsWeight: number
+}
+
+// Post frontmatter interface for read time calculation
+export interface ReadTimePostMetadata {
+	readTime?: number
+	excerpt?: string
+}
+
+// Post interface for read time calculation
+export interface ReadTimePost {
+	metadata?: {
+		fm?: ReadTimePostMetadata
+	}
+	content?: string
+}
+
+// Blog config type for accessing nested properties
+interface BlogConfigWithPosts {
+	posts?: {
+		readTime?: Partial<ReadTimeConfig>
+	}
+}
+
 // Default configuration that can be used without dependency on blogConfig
-export const DEFAULT_READ_TIME_CONFIG = {
+export const DEFAULT_READ_TIME_CONFIG: ReadTimeConfig = {
 	wordsPerMinute: 225,
 	defaultTime: 3,
 	minTimeForLongArticle: 5,
@@ -19,24 +51,27 @@ export const DEFAULT_READ_TIME_CONFIG = {
 
 /**
  * Logs an error and returns it for consistent error handling
- * @param {string} moduleName - Name of the module for error context
- * @param {Error} error - The error to handle
- * @returns {Error} The original error
+ * @param _moduleName - Name of the module for error context
+ * @param error - The error to handle
+ * @returns The original error
  */
-function handleError(moduleName, error) {
+function handleError(_moduleName: string, error: Error): Error {
 	logger.error('Error:', error)
 	return error
 }
 
+// Valid type names for validation
+type ValidTypeName = 'string' | 'number' | 'object' | 'array'
+
 /**
  * Validates that a value is of the expected type
- * @param {*} value - The value to validate
- * @param {string} type - Expected type ('string', 'number', 'object', 'array')
- * @param {string} name - Parameter name for error messages
- * @param {boolean} [isOptional=true] - Whether the value can be null/undefined
- * @throws {Error} If validation fails
+ * @param value - The value to validate
+ * @param type - Expected type ('string', 'number', 'object', 'array')
+ * @param name - Parameter name for error messages
+ * @param isOptional - Whether the value can be null/undefined
+ * @throws Error If validation fails
  */
-function validateType(value, type, name, isOptional = true) {
+function validateType(value: unknown, type: ValidTypeName, name: string, isOptional = true): void {
 	if (value === undefined || value === null) {
 		if (!isOptional) {
 			throw new Error(`${ name } is required`)
@@ -56,31 +91,25 @@ function validateType(value, type, name, isOptional = true) {
 
 /**
  * Gets the default read time from options, blogConfig, or defaults (in priority order)
- * @param {Object} [options] - Options that may contain defaultTime
- * @returns {number} The default read time in minutes
+ * @param options - Options that may contain defaultTime
+ * @returns The default read time in minutes
  */
-function getDefaultTime(options = {}) {
+function getDefaultTime(options: Partial<ReadTimeConfig> = {}): number {
+	const config = blogConfig as unknown as BlogConfigWithPosts
 	return options.defaultTime ??
-		blogConfig?.posts?.readTime?.defaultTime ??
+		config?.posts?.readTime?.defaultTime ??
 		DEFAULT_READ_TIME_CONFIG.defaultTime
 }
 
 /**
  * Calculates estimated reading time based on word count and content complexity
  *
- * @param {string} content - The text content to analyze
- * @param {Object} [options] - Configuration options
- * @param {number} [options.wordsPerMinute=225] - Reading speed in words per minute
- * @param {number} [options.defaultTime=3] - Default read time in minutes if calculation fails
- * @param {number} [options.minTimeForLongArticle=5] - Minimum read time for long articles
- * @param {number} [options.minTimeForVeryLongArticle=10] - Minimum read time for very long articles
- * @param {number} [options.longArticleThreshold=1500] - Word count threshold for long articles
- * @param {number} [options.veryLongArticleThreshold=3000] - Word count threshold for very long articles
- * @param {number} [options.headingsWeight=5] - How many headings equal one minute of reading time
- * @returns {number} Estimated reading time in minutes (rounded up to nearest whole number)
- * @throws {Error} If content processing fails
+ * @param content - The text content to analyze
+ * @param options - Configuration options
+ * @returns Estimated reading time in minutes (rounded up to nearest whole number)
+ * @throws Error If content processing fails
  */
-export function calculateReadTime(content, options = {}) {
+export function calculateReadTime(content: string, options: Partial<ReadTimeConfig> = {}): number {
 	// Return default time for non-string content
 	if (!content || typeof content !== 'string') {
 		return getDefaultTime(options)
@@ -91,9 +120,10 @@ export function calculateReadTime(content, options = {}) {
 		// 1. Provided options
 		// 2. blogConfig (if available)
 		// 3. DEFAULT_READ_TIME_CONFIG
-		const config = {
+		const configFromBlog = blogConfig as unknown as BlogConfigWithPosts
+		const config: ReadTimeConfig = {
 			...DEFAULT_READ_TIME_CONFIG,
-			...(blogConfig?.posts?.readTime || {}),
+			...(configFromBlog?.posts?.readTime || {}),
 			...options
 		}
 
@@ -137,7 +167,8 @@ export function calculateReadTime(content, options = {}) {
 		readTime = Math.max(readTime, defaultTime)
 
 		return readTime
-	} catch (error) {
+	} catch (err) {
+		const error = err instanceof Error ? err : new Error(String(err))
 		handleError(MODULE_NAME, error)
 		return getDefaultTime(options)
 	}
@@ -146,16 +177,12 @@ export function calculateReadTime(content, options = {}) {
 /**
  * Calculates estimated reading time from markdown content and frontmatter
  *
- * @param {Object} post - The blog post object
- * @param {Object} [post.metadata] - Post metadata
- * @param {Object} [post.metadata.fm] - Frontmatter metadata
- * @param {number} [post.metadata.fm.readTime] - Explicitly set reading time in minutes
- * @param {string} [post.content] - Markdown content
- * @param {Object} [options] - Configuration options (see calculateReadTime)
- * @returns {number} Estimated reading time in minutes
- * @throws {Error} If post object is invalid or processing fails
+ * @param post - The blog post object
+ * @param options - Configuration options (see calculateReadTime)
+ * @returns Estimated reading time in minutes
+ * @throws Error If post object is invalid or processing fails
  */
-export function getPostReadTime(post, options = {}) {
+export function getPostReadTime(post: ReadTimePost | null | undefined, options: Partial<ReadTimeConfig> = {}): number {
 	try {
 		// If post is null or undefined, return default
 		if (post === null || post === undefined) {
@@ -177,9 +204,10 @@ export function getPostReadTime(post, options = {}) {
 
 		// If we have an excerpt, use that to estimate (multiply by 3 for approximation)
 		if (post?.metadata?.fm?.excerpt) {
-			const config = {
+			const configFromBlog = blogConfig as unknown as BlogConfigWithPosts
+			const config: ReadTimeConfig = {
 				...DEFAULT_READ_TIME_CONFIG,
-				...(blogConfig?.posts?.readTime || {}),
+				...(configFromBlog?.posts?.readTime || {}),
 				...options
 			}
 
@@ -191,7 +219,8 @@ export function getPostReadTime(post, options = {}) {
 
 		// Fallback to default time
 		return getDefaultTime(options)
-	} catch (error) {
+	} catch (err) {
+		const error = err instanceof Error ? err : new Error(String(err))
 		handleError(MODULE_NAME, error)
 		return getDefaultTime(options)
 	}
