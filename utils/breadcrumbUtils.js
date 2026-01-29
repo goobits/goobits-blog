@@ -25,7 +25,7 @@ export function generateBreadcrumbs(data) {
 		showHome: true
 	}
 
-	if (!data) return breadcrumbConfig
+	if (!data) {return breadcrumbConfig}
 
 	// Handle different page types
 	switch(data.pageType) {
@@ -43,7 +43,7 @@ export function generateBreadcrumbs(data) {
 
 			// If post has a category, add it to the breadcrumb path
 			if (data.post.metadata?.fm?.category) {
-				const category = data.post.metadata.fm.category
+				const {category} = data.post.metadata.fm
 				breadcrumbConfig.items.push({
 					href: getCategoryUrl(category, false),
 					label: category

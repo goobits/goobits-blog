@@ -34,7 +34,7 @@ export async function handleBlogI18n(event, handler) {
 	if (blogConfig.i18n?.enabled &&
 		event.url.pathname &&
 		(event.url.pathname === blogConfig.uri ||
-		 event.url.pathname.startsWith(blogConfig.uri + '/'))) {
+		 event.url.pathname.startsWith(`${blogConfig.uri  }/`))) {
 
 		// Only call handler if it's actually a function
 		if (typeof handler === 'function') {

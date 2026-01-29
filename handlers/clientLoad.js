@@ -43,8 +43,8 @@ export function createBlogPageLoad(options = {}) {
 		} else {
 			log.log('[ClientLoad] Not a post page or missing path:', {
 				pageType: data.pageType,
-				hasPost: !!data.post,
-				hasPath: !!data.post?.path
+				hasPost: Boolean(data.post),
+				hasPath: Boolean(data.post?.path)
 			})
 		}
 

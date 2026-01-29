@@ -28,7 +28,7 @@
 	 */
 
 	/** @type {Props} */
-	let {
+	const {
 		title,
 		description,
 		buttonText,

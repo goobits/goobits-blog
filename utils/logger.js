@@ -38,12 +38,10 @@ export function configureLogger(config) {
 export function createLogger(module) {
 	const prefix = `[${ globalConfig.prefix }:${ module }]`
 
-	const shouldLog = (level) => {
-		return globalConfig.enabled && level <= globalConfig.level
-	}
+	const shouldLog = (level) => globalConfig.enabled && level <= globalConfig.level
 
 	const log = (level, method, message, ...args) => {
-		if (!shouldLog(level)) return
+		if (!shouldLog(level)) {return}
 
 		const timestamp = new Date().toISOString()
 		const logMethod = console[method] || console.log

@@ -220,10 +220,10 @@ export async function generateBlogEntries(languages = [ 'en' ], config = null) {
 
 	// Generate post entries
 	allPostsData.forEach(post => {
-		if (!post || !post.urlPath) return
+		if (!post || !post.urlPath) {return}
 
 		const pathParts = post.urlPath.split('/').filter(part => part)
-		if (pathParts.length < 3) return
+		if (pathParts.length < 3) {return}
 
 		const [ year, month, postSlug ] = pathParts
 		const fullSlug = `${ year }/${ month }/${ postSlug }`

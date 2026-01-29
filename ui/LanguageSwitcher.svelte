@@ -33,7 +33,7 @@
 	/**
 	 * @type {LanguageSwitcherProps}
 	 */
-	let {
+	const {
 		variant = 'dropdown',
 		showLabels = true,
 		className = '',
@@ -108,8 +108,8 @@
 
 	// Create modifier classes
 	const switcherModifiers = []
-	if (variant) switcherModifiers.push(variant)
-	if (showLabels) switcherModifiers.push('display-labels')
+	if (variant) {switcherModifiers.push(variant)}
+	if (showLabels) {switcherModifiers.push('display-labels')}
 
 	// Get component text from messages or use defaults
 	const switchLanguageLabel = messages.switchLanguage || 'Switch Language'

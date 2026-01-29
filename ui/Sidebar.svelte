@@ -33,7 +33,7 @@
 	 */
 
 	/** @type {Props} */
-	let {
+	const {
 		posts = [],
 		activeCategory = '',
 		activeTag = '',

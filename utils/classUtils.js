@@ -94,7 +94,7 @@ export function propertyModifier(block, property, value) {
 		throw new TypeError('Block and property must be strings')
 	}
 
-	if (!value) return ''
+	if (!value) {return ''}
 	return `${ block }--${ property }-${ value }`
 }
 

@@ -3,6 +3,20 @@ import { createLogger } from './logger.js'
 
 const logger = createLogger('ReadTimeUtils')
 
+// Module name for error context
+const MODULE_NAME = 'ReadTimeUtils'
+
+// Default configuration that can be used without dependency on blogConfig
+export const DEFAULT_READ_TIME_CONFIG = {
+	wordsPerMinute: 225,
+	defaultTime: 3,
+	minTimeForLongArticle: 5,
+	minTimeForVeryLongArticle: 10,
+	longArticleThreshold: 1500, // Word count
+	veryLongArticleThreshold: 3000, // Word count
+	headingsWeight: 5
+}
+
 /**
  * Logs an error and returns it for consistent error handling
  * @param {string} moduleName - Name of the module for error context
@@ -49,20 +63,6 @@ function getDefaultTime(options = {}) {
 	return options.defaultTime ??
 		blogConfig?.posts?.readTime?.defaultTime ??
 		DEFAULT_READ_TIME_CONFIG.defaultTime
-}
-
-// Module name for error context
-const MODULE_NAME = 'ReadTimeUtils'
-
-// Default configuration that can be used without dependency on blogConfig
-export const DEFAULT_READ_TIME_CONFIG = {
-	wordsPerMinute: 225,
-	defaultTime: 3,
-	minTimeForLongArticle: 5,
-	minTimeForVeryLongArticle: 10,
-	longArticleThreshold: 1500, // Word count
-	veryLongArticleThreshold: 3000, // Word count
-	headingsWeight: 5
 }
 
 /**

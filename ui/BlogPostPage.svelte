@@ -18,7 +18,7 @@
 
 	const logger = createLogger('BlogPostPage')
 
-	let { data, messages = {}, locale = 'en' } = $props()
+	const { data, messages = {}, locale = 'en' } = $props()
 	
 	// Create message getter
 	const getMessage = createMessageGetter({ ...defaultMessages, ...messages })
@@ -84,7 +84,7 @@
 	// Log initial state
 	// Create constant values for the initial state to avoid reactivity warnings
 	// Don't capture reactive values in closures
-	const _hasInitialPostContent = !!data.postContent
+	const _hasInitialPostContent = Boolean(data.postContent)
 	const _isContentLoadedInitially = false
 	const _hasInitialComponent = false
 
@@ -162,24 +162,24 @@
 	const isPostPage = data.pageType === 'post' && data.post
 
 	// Initialize values only once at component creation time, not as reactive state
-	let readTime = isPostPage ? getReadTime() : undefined
-	let formattedDate = isPostPage ? getFormattedDate() : undefined
-	let postTitle = isPostPage ? data.post.metadata.fm.title : undefined
-	let _postExcerpt = isPostPage ? (data.post.metadata.fm.excerpt || '') : ''
-	let _postTags = isPostPage ? (data.post.metadata.fm.tags?.join(',') || '') : ''
-	let coverImage = isPostPage ? getCoverImageUrl(data.post) : undefined
-	let authorAvatar = isPostPage ? 
+	const readTime = isPostPage ? getReadTime() : undefined
+	const formattedDate = isPostPage ? getFormattedDate() : undefined
+	const postTitle = isPostPage ? data.post.metadata.fm.title : undefined
+	const _postExcerpt = isPostPage ? (data.post.metadata.fm.excerpt || '') : ''
+	const _postTags = isPostPage ? (data.post.metadata.fm.tags?.join(',') || '') : ''
+	const coverImage = isPostPage ? getCoverImageUrl(data.post) : undefined
+	const authorAvatar = isPostPage ? 
 		getAuthorAvatarUrl(data.post, '/static/images/authors/marcus-fleming.jpg') : undefined
-	let primaryCategory = isPostPage ? getPrimaryCategory() : undefined
-	let titleEmoji = isPostPage ? 
+	const primaryCategory = isPostPage ? getPrimaryCategory() : undefined
+	const titleEmoji = isPostPage ? 
 		getEmojiFromTitle(data.post.metadata.fm.title || '', '🐝') : undefined
 
-	let currentPostId = isPostPage ? data.post.path : undefined
-	let currentCategory = isPostPage ? 
+	const currentPostId = isPostPage ? data.post.path : undefined
+	const currentCategory = isPostPage ? 
 		(data.post.metadata.fm.category || (data.post.metadata.fm.categories?.[0] || null)) : undefined
-	let currentTags = isPostPage ? (data.post.metadata.fm.tags || []) : []
+	const currentTags = isPostPage ? (data.post.metadata.fm.tags || []) : []
 
-	let similarPosts = isPostPage && data.allPosts && Array.isArray(data.allPosts) ? 
+	const similarPosts = isPostPage && data.allPosts && Array.isArray(data.allPosts) ? 
 		getSimilarPosts(data.allPosts, currentPostId, currentCategory, currentTags, 3) : []
 
 	// Log metadata values

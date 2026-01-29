@@ -73,7 +73,7 @@ export function createBlogSlugHandler(options = {}) {
 	return {
 		prerender,
 		trailingSlash,
-		entries: async () => generateBlogEntries(languages, config),
+		entries: async () => await generateBlogEntries(languages, config),
 		load: async ({ params, locals }) => {
 			const { slug } = params
 			const lang = getLanguage(locals)

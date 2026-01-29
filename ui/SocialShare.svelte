@@ -31,7 +31,7 @@
 	 */
 
 	/** @type {Props} */
-	let {
+	const {
 		url = typeof window !== 'undefined' ? window.location.href : '',
 		title = 'Check out this content',
 		text = '',

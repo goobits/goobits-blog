@@ -131,7 +131,7 @@ export function getEmojiFromTitle(title, defaultEmoji = blogConfig.pageContent.e
  * @returns {{ src: string, alt: string, width?: number, height?: number }} Image data
  */
 export function getPostImageData(post) {
-	if (!post?.metadata?.fm) return { src: '', alt: 'Blog post' }
+	if (!post?.metadata?.fm) {return { src: '', alt: 'Blog post' }}
 
 	const src = post.metadata.fm.thumbnail?.src ||
 		post.metadata.fm.image?.src || ''
@@ -161,15 +161,15 @@ export function getPostImageData(post) {
  * @returns {string[]} Array of categories
  */
 export function getPostCategories(post) {
-	if (!post?.metadata?.fm) return []
+	if (!post?.metadata?.fm) {return []}
 
 	if (post.metadata.fm.categories && Array.isArray(post.metadata.fm.categories)) {
 		return post.metadata.fm.categories
-	} else if (post.metadata.fm.category) {
+	} if (post.metadata.fm.category) {
 		return [ post.metadata.fm.category ]
-	} else {
+	} 
 		return []
-	}
+	
 }
 
 /**
@@ -178,7 +178,7 @@ export function getPostCategories(post) {
  * @returns {string[]} Array of tags
  */
 export function getPostTags(post) {
-	if (!post?.metadata?.fm) return []
+	if (!post?.metadata?.fm) {return []}
 	return Array.isArray(post.metadata.fm.tags) ? post.metadata.fm.tags : []
 }
 
@@ -346,7 +346,7 @@ export function parseCategoryDescriptions(fileContent) {
 
 	for (const line of lines) {
 		// Skip empty lines
-		if (!line.trim()) continue
+		if (!line.trim()) {continue}
 
 		// Check for main category definition (key:)
 		const categoryMatch = line.match(/^([a-z0-9-]+):\s*$/)
@@ -426,7 +426,7 @@ export function localizeUrl(url) {
  * @returns {string} Relative URL to the post
  */
 export function getPostUrl(post, withLanguage = false) {
-	if (!post?.urlPath) return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri
+	if (!post?.urlPath) {return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri}
 	const url = `${ blogConfig.uri }${ post.urlPath }`
 	return withLanguage ? _localizeUrl(url) : url
 }
@@ -438,7 +438,7 @@ export function getPostUrl(post, withLanguage = false) {
  * @returns {string} Relative URL to the category
  */
 export function getCategoryUrl(category, withLanguage = false) {
-	if (!category) return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri
+	if (!category) {return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri}
 	const url = `${ blogConfig.uri }/category/${ slugify(category) }`
 	return withLanguage ? _localizeUrl(url) : url
 }
@@ -450,7 +450,7 @@ export function getCategoryUrl(category, withLanguage = false) {
  * @returns {string} Relative URL to the tag
  */
 export function getTagUrl(tag, withLanguage = false) {
-	if (!tag) return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri
+	if (!tag) {return withLanguage ? _localizeUrl(blogConfig.uri) : blogConfig.uri}
 	const url = `${ blogConfig.uri }/tag/${ slugify(tag) }`
 	return withLanguage ? _localizeUrl(url) : url
 }
@@ -462,7 +462,7 @@ export function getTagUrl(tag, withLanguage = false) {
  * @returns {string} Post excerpt
  */
 export function getPostExcerpt(post, maxLength = blogConfig.posts.excerptLength) {
-	if (!post?.metadata?.fm) return ''
+	if (!post?.metadata?.fm) {return ''}
 
 	let excerpt = post.metadata.fm.excerpt || ''
 
@@ -586,7 +586,7 @@ export function getAllCategories(posts, limit = blogConfig.posts.popularCategori
 
 	posts.forEach(post => {
 		// Skip posts with missing metadata
-		if (!post?.metadata?.fm) return
+		if (!post?.metadata?.fm) {return}
 
 		if (Array.isArray(post.metadata.fm.categories)) {
 			post.metadata.fm.categories.forEach(category => {
@@ -620,7 +620,7 @@ export function getAllTags(posts, limit = blogConfig.posts.popularTagsCount) {
 
 	posts.forEach(post => {
 		// Skip posts with missing metadata
-		if (!post?.metadata?.fm) return
+		if (!post?.metadata?.fm) {return}
 
 		if (Array.isArray(post.metadata.fm.tags)) {
 			post.metadata.fm.tags.forEach(tag => {
@@ -781,7 +781,7 @@ export async function getAllPosts(options = {}) {
 		return cached.posts
 	}
 
-	logger.log('[BlogUtils] Loading blog posts from disk' + (lang !== 'en' ? ` for language: ${ lang }` : ''))
+	logger.log(`[BlogUtils] Loading blog posts from disk${  lang !== 'en' ? ` for language: ${ lang }` : ''}`)
 
 	// Use the abstracted function to get blog post files
 	const posts = getBlogPostFiles()
@@ -827,12 +827,12 @@ export async function getAllPosts(options = {}) {
 
 			// First check if readTime is already set in metadata
 			if (postModule.metadata.readTime) {
-				readTime = postModule.metadata.readTime
+				({ readTime } = postModule.metadata)
 			} else {
 				// Use our utility function to calculate read time
 				const post = {
 					metadata: { fm: postModule.metadata },
-					content: content
+					content
 				}
 				readTime = getPostReadTime(post)
 			}
@@ -849,7 +849,7 @@ export async function getAllPosts(options = {}) {
 			const basePost = {
 				metadata: { fm: postModule.metadata },
 				date: postModule.metadata.date,
-				urlPath: urlPath,
+				urlPath,
 				path: importPath,
 				content: includeContent ? content : '',
 				lang: 'en' // Default language
@@ -871,7 +871,7 @@ export async function getAllPosts(options = {}) {
 				}))
 
 				return [ basePost, ...localizedPosts ]
-			} else if (lang !== 'en' && postModule.metadata.i18n?.[lang]) {
+			} if (lang !== 'en' && postModule.metadata.i18n?.[lang]) {
 				// Return just the requested localization
 				return {
 					...basePost,
@@ -884,10 +884,10 @@ export async function getAllPosts(options = {}) {
 					},
 					lang
 				}
-			} else {
+			} 
 				// Return the base post (English or no localization)
 				return basePost
-			}
+			
 		})
 	)
 
@@ -1060,7 +1060,7 @@ ${ categories }
  * @returns {string} XML-safe escaped string
  */
 function escapeXml(str) {
-	if (!str) return ''
+	if (!str) {return ''}
 
 	return String(str)
 		.replace(/&/g, '&amp;')
@@ -1076,7 +1076,7 @@ function escapeXml(str) {
  * @returns {string} Categories XML string to include in the feed item
  */
 function getRssCategoriesXml(post) {
-	if (!post.metadata?.fm) return ''
+	if (!post.metadata?.fm) {return ''}
 
 	const categories = []
 
