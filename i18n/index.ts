@@ -9,6 +9,15 @@ import {
 	layoutLoadWithBlogI18n
 } from './hooks.js'
 
+// Re-export types for consumers
+export type {
+	I18nConfig,
+	BlogConfigWithI18n,
+	I18nHandler,
+	LoadFunction,
+	I18nLoadResult
+} from './hooks.js'
+
 export {
 	createMessageGetter,
 	getMergedMessages,

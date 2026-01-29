@@ -3,19 +3,28 @@
  * Includes standard component class names and helper functions for BEM class generation.
  */
 
+// BEM options interface
+export interface BemClassesOptions {
+	modifiers?: string[]
+	elements?: string[]
+	elementModifiers?: Record<string, string[]>
+	className?: string
+}
+
+// Boolean conditions for dynamic classes
+export interface DynamicClassConditions {
+	[key: string]: boolean
+}
+
 /**
  * Creates a standardized BEM class string from components
  *
- * @param {string} block - The BEM block name (should start with 'goo__')
- * @param {Object} [options] - Options for class generation
- * @param {string[]} [options.modifiers] - BEM modifiers to apply to the block
- * @param {string[]} [options.elements] - BEM elements to include
- * @param {Object<string, string[]>} [options.elementModifiers] - Modifiers for specific elements
- * @param {string} [options.className] - Additional classes to append
- * @returns {string} Formatted class string with proper BEM naming
- * @throws {TypeError} If block is not a string
+ * @param block - The BEM block name (should start with 'goo__')
+ * @param options - Options for class generation
+ * @returns Formatted class string with proper BEM naming
+ * @throws TypeError If block is not a string
  */
-export function bemClasses(block, options = {}) {
+export function bemClasses(block: string, options: BemClassesOptions = {}): string {
 	if (typeof block !== 'string') {
 		throw new TypeError('Block name must be a string')
 	}
@@ -23,7 +32,7 @@ export function bemClasses(block, options = {}) {
 	const { modifiers = [], elements = [], elementModifiers = {}, className = '' } = options
 
 	// Start with the base block class
-	const classes = [ block ]
+	const classes: string[] = [ block ]
 
 	// Add block modifiers
 	modifiers.forEach(modifier => {
@@ -62,20 +71,20 @@ export function bemClasses(block, options = {}) {
 /**
  * Helper function to create a dynamic class with property-based modifiers
  *
- * @param {string} block - Base BEM block name
- * @param {Object<string, boolean>} [conditions] - Conditions that determine which modifiers to apply
- * @param {string} [className] - Additional classes to append
- * @returns {string} Formatted class string with modifiers applied based on conditions
- * @throws {TypeError} If block is not a string
+ * @param block - Base BEM block name
+ * @param conditions - Conditions that determine which modifiers to apply
+ * @param className - Additional classes to append
+ * @returns Formatted class string with modifiers applied based on conditions
+ * @throws TypeError If block is not a string
  */
-export function dynamicClasses(block, conditions = {}, className = '') {
+export function dynamicClasses(block: string, conditions: DynamicClassConditions = {}, className = ''): string {
 	if (typeof block !== 'string') {
 		throw new TypeError('Block name must be a string')
 	}
 
 	const modifiers = Object.entries(conditions)
-		.filter(([ _, value ]) => Boolean(value))
-		.map(([ key, _ ]) => key)
+		.filter(([ _, value ]) => value)
+		.map(([ key ]) => key)
 
 	return bemClasses(block, { modifiers, className })
 }
@@ -83,26 +92,26 @@ export function dynamicClasses(block, conditions = {}, className = '') {
 /**
  * Creates a dynamic modifier class for a specific property value
  *
- * @param {string} block - Base BEM block name
- * @param {string} property - Property name to use as modifier prefix
- * @param {string|number} value - Property value to use as modifier suffix
- * @returns {string} Formatted modifier class in BEM syntax
- * @throws {TypeError} If block or property is not a string
+ * @param block - Base BEM block name
+ * @param property - Property name to use as modifier prefix
+ * @param value - Property value to use as modifier suffix
+ * @returns Formatted modifier class in BEM syntax
+ * @throws TypeError If block or property is not a string
  */
-export function propertyModifier(block, property, value) {
+export function propertyModifier(block: string, property: string, value: string | number): string {
 	if (typeof block !== 'string' || typeof property !== 'string') {
 		throw new TypeError('Block and property must be strings')
 	}
 
-	if (!value) return ''
+	// Handle falsy values (including null/undefined passed via type assertions in tests)
+	if (value === '' || value === 0 || value === null || value === undefined) { return '' }
 	return `${ block }--${ property }-${ value }`
 }
 
 /**
  * Standard class names for blog components using BEM naming convention with goo__ namespace
- * @type {Object<string, string>}
  */
-export const ClassNames = {
+export const ClassNames: Readonly<Record<string, string>> = {
 	blogCard: 'goo__card',
 	postList: 'goo__post-list',
 	tags: 'goo__tags',
@@ -111,4 +120,4 @@ export const ClassNames = {
 	newsletter: 'goo__newsletter',
 	sidebar: 'goo__sidebar',
 	langSwitcher: 'goo__lang-switcher'
-}
+} as const

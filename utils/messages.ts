@@ -3,22 +3,32 @@
  * Provides a flexible way to handle messages from any i18n library
  */
 
-import { defaultMessages } from '../config/defaultMessages.js'
+import { defaultMessages, type DefaultMessages } from '../config/defaultMessages.js'
 
 // Use console for logging within the package
 const logger = console
 
+// Message value type - can be a string, a function, or a nested object
+export type MessageValue = string | ((...args: unknown[]) => string) | Record<string, string | ((...args: unknown[]) => string)>
+
+// Messages object type
+export interface MessagesObject {
+	[key: string]: MessageValue
+}
+
+// Message getter function type
+export type MessageGetter = (key: string, fallback?: string, ...args: unknown[]) => string | MessageValue
+
 /**
  * Creates a message getter function that handles both string and function messages
  *
- * @param {Object} messages - Object containing message strings or functions
- * @param {Object} [messages.categories] - Nested message object for blog categories
- * @returns {Function} A function that retrieves messages with fallback support
- * @throws {TypeError} If messages is not an object
+ * @param messages - Object containing message strings or functions
+ * @returns A function that retrieves messages with fallback support
+ * @throws TypeError If messages is not an object
  */
-export function createMessageGetter(messages = {}) {
+export function createMessageGetter(messages: MessagesObject = {}): MessageGetter {
 	if (messages !== null && typeof messages === 'object') {
-		return (key, fallback, ...args) => {
+		return (key: string, fallback?: string, ...args: unknown[]): string | MessageValue => {
 			// Validate key to prevent prototype pollution
 			if (typeof key !== 'string' || key === '__proto__' || key === 'constructor') {
 				logger.warn('[BlogMessages] Invalid message key:', key)
@@ -26,23 +36,24 @@ export function createMessageGetter(messages = {}) {
 			}
 
 			// First check user messages
-			if (messages[key]) {
-				const msg = messages[key]
-				if (typeof msg === 'function') {
+			const userMsg = messages[key]
+			if (userMsg !== undefined) {
+				if (typeof userMsg === 'function') {
 					try {
-						return msg(...args)
+						return userMsg(...args)
 					} catch {
 						// Log minimal error info to avoid leaking sensitive data
 						logger.warn(`[BlogMessages] Error calling message function for key: ${ key }`)
 						return fallback || key
 					}
 				}
-				return msg
+				return userMsg
 			}
 
 			// Then check default messages
-			if (defaultMessages[key]) {
-				const defaultMsg = defaultMessages[key]
+			const defaultMsgs = defaultMessages as unknown as MessagesObject
+			const defaultMsg = defaultMsgs[key]
+			if (defaultMsg !== undefined) {
 				if (typeof defaultMsg === 'function') {
 					try {
 						return defaultMsg(...args)
@@ -58,9 +69,11 @@ export function createMessageGetter(messages = {}) {
 					// Validate nested key to prevent prototype pollution
 					if (typeof nestedKey === 'string' &&
 						nestedKey !== '__proto__' &&
-						nestedKey !== 'constructor' &&
-						defaultMsg[nestedKey]) {
-						return defaultMsg[nestedKey]
+						nestedKey !== 'constructor') {
+						const nestedValue = (defaultMsg as Record<string, MessageValue>)[nestedKey]
+						if (nestedValue !== undefined) {
+							return nestedValue
+						}
 					}
 				}
 				return defaultMsg
@@ -77,11 +90,11 @@ export function createMessageGetter(messages = {}) {
 /**
  * Merges user-provided messages with default messages
  *
- * @param {Object} [userMessages={}] - User-provided messages to override defaults
- * @returns {Object} Complete messages object with defaults and user overrides
- * @throws {TypeError} If userMessages is not an object
+ * @param userMessages - User-provided messages to override defaults
+ * @returns Complete messages object with defaults and user overrides
+ * @throws TypeError If userMessages is not an object
  */
-export function getMergedMessages(userMessages = {}) {
+export function getMergedMessages(userMessages: Partial<DefaultMessages> = {}): DefaultMessages {
 	if (userMessages !== null && typeof userMessages === 'object') {
 		return {
 			...defaultMessages,
@@ -91,4 +104,3 @@ export function getMergedMessages(userMessages = {}) {
 
 	throw new TypeError('User messages must be an object')
 }
-

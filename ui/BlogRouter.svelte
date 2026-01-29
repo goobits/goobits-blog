@@ -19,7 +19,7 @@
 	 * @property {boolean} [useLayout=true] - Whether to wrap in BlogLayout
 	 */
 	
-	let { 
+	const { 
 		data, 
 		useSEO = true, 
 		useLayout = true,

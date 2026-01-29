@@ -2,7 +2,7 @@
 	import { createMessageGetter } from '@goobits/blog/utils/index.js'
 	import { blogConfig, defaultMessages } from '@goobits/blog/config/index.js'
 
-	let { data, messages = {} } = $props()
+	const { data, messages = {} } = $props()
 
 	// Create message getter
 	const getMessage = createMessageGetter({ ...defaultMessages, ...messages })

@@ -114,7 +114,7 @@
 	})
 
 	const getColumnClass = $derived.by(() => {
-		if (columns > 0 && columns <= 4) return propertyModifier('goo__post-list-grid', 'columns', columns)
+		if (columns > 0 && columns <= 4) {return propertyModifier('goo__post-list-grid', 'columns', columns)}
 		return propertyModifier('goo__post-list-grid', 'columns', 1) // Ensure we always have a class that enforces single column
 	})
 </script>
@@ -243,7 +243,7 @@
 								class={bemClasses('goo__post-list-pagination-number', { modifiers: page === currentPage ? ['state-current'] : [] })}
 								aria-label={getMessage('paginationPage', `Page ${page}`, page)}
 								aria-current={page === currentPage ? 'page' : undefined}
-								onclick={() => (currentPage = page)}
+								onclick={() => { currentPage = page; }}
 						>
 							{page}
 						</button>

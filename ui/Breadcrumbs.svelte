@@ -20,7 +20,7 @@
 	const blogUri = blogConfig.uri || '/blog'
 
 	// Component Props
-	let {
+	const {
 		items = [],
 		current = '',
 		showHome = true,

@@ -16,9 +16,8 @@
 	 */
 	import './BlogCard.scss'
 	import TagsCategories from './TagCategoryList.svelte'
-	import { bemClasses, ClassNames, createMessageGetter } from '@goobits/blog/utils/index.js'
+	import { bemClasses, ClassNames, createMessageGetter, getEmojiFromTitle, getPostImageData, getPostCategories, getBlogUrl } from '@goobits/blog/utils/index.js'
 	import { blogConfig, defaultMessages } from '@goobits/blog/config/index.js'
-	import { getEmojiFromTitle, getPostImageData, getPostCategories, getBlogUrl } from '@goobits/blog/utils/index.js'
 
 	/**
 	 * @typedef {Object} BlogCardProps
@@ -34,7 +33,7 @@
  * @property {string} [className] - Additional CSS class name
  * @type {BlogCardProps}
 	 */
-	let {
+	const {
 		post,
 		isCompact = false,
 		isHighlighted = false,
@@ -70,8 +69,8 @@
 
 	// Set dynamic classes based on props using BEM conventions
 	const cardModifiers = []
-	if (isCompact) cardModifiers.push('size-compact')
-	if (isHighlighted) cardModifiers.push('highlighted')
+	if (isCompact) {cardModifiers.push('size-compact')}
+	if (isHighlighted) {cardModifiers.push('highlighted')}
 
 	// Filter out the current tag if it exists
 	const filteredTags = currentTag && post?.metadata?.fm?.tags

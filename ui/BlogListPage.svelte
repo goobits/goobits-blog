@@ -3,14 +3,13 @@
 	import PostList from './PostList.svelte'
 	import Sidebar from './Sidebar.svelte'
 	import { blogConfig, defaultMessages } from '@goobits/blog/config/index.js'
-	import { createMessageGetter } from '@goobits/blog/utils/index.js'
+	import { createMessageGetter, slugify } from '@goobits/blog/utils/index.js'
 	import { createLogger } from '@goobits/blog/utils/logger.js'
 	import { onMount } from 'svelte'
-	import { slugify } from '@goobits/blog/utils/index.js'
 
 	const logger = createLogger('BlogListPage')
 
-	let { data, messages = {}, locale = 'en' } = $props()
+	const { data, messages = {}, locale = 'en' } = $props()
 	
 	// Create message getter
 	const getMessage = createMessageGetter({ ...defaultMessages, ...messages })
@@ -24,7 +23,7 @@
 	let hasMorePosts = $state(data.hasMorePosts !== false) // Use server data or default to true
 
 	// Use allPosts as the visible posts (no more slicing)
-	let visiblePosts = $derived(allPosts)
+	const visiblePosts = $derived(allPosts)
 
 	// Initialize posts from server data
 	$effect(() => {
@@ -41,7 +40,7 @@
 	 * Loads the next batch of posts from the API for infinite scrolling.
 	 */
 	async function loadMorePosts() {
-		if (isLoading || !hasMorePosts) return
+		if (isLoading || !hasMorePosts) {return}
 
 		isLoading = true
 		try {
