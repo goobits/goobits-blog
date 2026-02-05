@@ -6,7 +6,7 @@
  * leads to 404s or wrong content being served.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
 	createBlogIndexHandler,
 	createBlogSlugHandler,
@@ -36,13 +36,13 @@ vi.mock('../handlers/routeUtils.js', () => ({
 		hasMorePosts: false,
 		lang: 'en'
 	}),
-	loadCategory: vi.fn().mockImplementation(async (slug: string) => {
+	loadCategory: vi.fn().mockImplementation((slug: string) => {
 		if (slug === 'nonexistent') {
 			const error = new Error('Category not found') as Error & { status: number }
 			error.status = 404
 			throw error
 		}
-		return {
+		return Promise.resolve({
 			pageType: 'category',
 			posts: [],
 			allPosts: [],
@@ -52,30 +52,30 @@ vi.mock('../handlers/routeUtils.js', () => ({
 			categoryImage: null,
 			categoryImageAlt: null,
 			lang: 'en'
-		}
+		})
 	}),
-	loadTag: vi.fn().mockImplementation(async (slug: string) => {
+	loadTag: vi.fn().mockImplementation((slug: string) => {
 		if (slug === 'nonexistent') {
 			const error = new Error('Tag not found') as Error & { status: number }
 			error.status = 404
 			throw error
 		}
-		return {
+		return Promise.resolve({
 			pageType: 'tag',
 			posts: [],
 			allPosts: [],
 			tag: slug,
 			currentTag: slug,
 			lang: 'en'
-		}
+		})
 	}),
-	loadPost: vi.fn().mockImplementation(async (year: string, month: string, slug: string) => {
+	loadPost: vi.fn().mockImplementation((year: string, month: string, slug: string) => {
 		if (slug === 'nonexistent') {
 			const error = new Error('Post not found') as Error & { status: number }
 			error.status = 404
 			throw error
 		}
-		return {
+		return Promise.resolve({
 			pageType: 'post',
 			post: {
 				metadata: { fm: { title: 'Test Post', date: `${year}-${month}-15` } },
@@ -84,7 +84,7 @@ vi.mock('../handlers/routeUtils.js', () => ({
 			},
 			allPosts: [],
 			lang: 'en'
-		}
+		})
 	}),
 	generateBlogEntries: vi.fn().mockResolvedValue([
 		{ slug: '2024/01/test-post' },

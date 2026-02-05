@@ -23,38 +23,39 @@ vi.mock('../config/index.js', () => ({
 	getBlogPostFiles: () => ({})
 }))
 
-// Helper to create test posts
-function createPost(overrides: Partial<{
-	title: string
-	date: string
-	categories: string[]
-	category: string
-	tags: string[]
-	excerpt: string
-	content: string
-	urlPath: string
-	path: string
-	authorName: string
-	updated: string
-}>): ProcessedPost {
-	return {
-		metadata: {
-			fm: {
-				title: overrides.title ?? 'Test Post',
-				date: overrides.date ?? '2024-01-15',
-				categories: overrides.categories,
-				category: overrides.category,
-				tags: overrides.tags,
-				excerpt: overrides.excerpt,
-				author: overrides.authorName ? { name: overrides.authorName } : undefined,
-				updated: overrides.updated
-			}
-		},
+// Helper to create test posts with clean optional property handling
+function createPost(overrides: {
+	title?: string
+	date?: string
+	categories?: string[]
+	category?: string
+	tags?: string[]
+	excerpt?: string
+	content?: string
+	urlPath?: string
+	path?: string
+	authorName?: string
+	updated?: string
+} = {}): ProcessedPost {
+	const fm: ProcessedPost['metadata']['fm'] = {
+		title: overrides.title ?? 'Test Post',
+		date: overrides.date ?? '2024-01-15'
+	}
+	if (overrides.categories) { fm.categories = overrides.categories }
+	if (overrides.category) { fm.category = overrides.category }
+	if (overrides.tags) { fm.tags = overrides.tags }
+	if (overrides.excerpt) { fm.excerpt = overrides.excerpt }
+	if (overrides.authorName) { fm.author = { name: overrides.authorName } }
+	if (overrides.updated) { fm.updated = overrides.updated }
+
+	const post: ProcessedPost = {
+		metadata: { fm },
 		date: overrides.date ?? '2024-01-15',
 		urlPath: overrides.urlPath ?? '/2024/01/test-post',
 		path: overrides.path ?? '/content/Blog/2024/01/test-post.md',
-		content: overrides.content
+		content: overrides.content ?? ''
 	}
+	return post
 }
 
 const defaultOptions: RssFeedOptions = {
@@ -245,7 +246,7 @@ describe('generateRssFeed', () => {
 		})
 
 		it('uses fallback description when no excerpt', () => {
-			const posts = [createPost({ excerpt: undefined, content: undefined })]
+			const posts = [createPost({})]
 			const xml = generateRssFeed(posts, defaultOptions)
 
 			expect(xml).toContain('<description>No description available</description>')
@@ -327,12 +328,14 @@ describe('generateRssFeed', () => {
 
 		it('handles very long excerpts by truncating', () => {
 			const longContent = 'A'.repeat(1000)
-			const posts = [createPost({ excerpt: undefined, content: longContent })]
+			const posts = [createPost({ content: longContent })]
 			const xml = generateRssFeed(posts, defaultOptions)
 
 			// Description should be truncated (default 300 char limit in generateRssFeed)
 			const descMatch = xml.match(/<description>(.*?)<\/description>/s)
-			expect(descMatch?.[1].length).toBeLessThan(350) // Some margin for "..."
+			const capturedDesc = descMatch?.[1]
+			expect(capturedDesc).toBeDefined()
+			expect(capturedDesc?.length).toBeLessThan(350) // Some margin for "..."
 		})
 
 		it('handles unicode content correctly', () => {
