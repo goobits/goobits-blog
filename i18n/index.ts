@@ -11,12 +11,13 @@ import {
 
 // Re-export types for consumers
 export type {
-	I18nConfig,
-	BlogConfigWithI18n,
 	I18nHandler,
 	LoadFunction,
 	I18nLoadResult
 } from './hooks.js'
+
+// Re-export i18n config type from the config module
+export type { I18nConfig } from '../config/defaults.js'
 
 export {
 	createMessageGetter,

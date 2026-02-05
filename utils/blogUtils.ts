@@ -40,37 +40,6 @@ async function getNodePath(): Promise<NodePath | null> {
 
 const logger: Logger = createLogger('BlogUtils')
 
-// Blog config interface for type casting
-interface BlogConfigType {
-	name: string
-	description: string
-	uri: string
-	debug?: boolean
-	posts: {
-		contentBasePath: string
-		excerptLength: number
-		relatedPostsCount: number
-		recentPostsCount: number
-		popularTagsCount: number
-		popularCategoriesCount: number
-	}
-	pageContent: {
-		emptyStateEmoji: string
-	}
-	images: {
-		defaults: {
-			coverImage: string
-			authorAvatar: string
-			blogPath: string
-			authorsPath: string
-		}
-	}
-	i18n?: {
-		enabled?: boolean
-		includeLanguageInURL?: boolean
-	}
-}
-
 // Post image interface
 export interface PostImage {
 	src: string
@@ -193,7 +162,7 @@ export function setUrlLocalizer(localizer: UrlLocalizer): void {
  */
 export function clearBlogCache(): void {
 	postsCache.clear()
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	if (config.debug) {
 		logger.info('Blog cache cleared')
 	}
@@ -209,7 +178,7 @@ function isValidPostArray(posts: unknown): posts is ProcessedPost[] {
 }
 
 // Log version info on import when debugging is enabled
-const configForDebug = blogConfig as unknown as BlogConfigType
+const configForDebug = blogConfig
 if (configForDebug.debug) {
 	const { versionString } = getBlogVersion()
 	logger.info('[BlogUtils]', versionString)
@@ -262,7 +231,7 @@ export function slugify(text: string): string {
  * @returns The extracted emoji or default
  */
 export function getEmojiFromTitle(title: string | undefined | null, defaultEmoji?: string): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const fallback = defaultEmoji ?? config.pageContent.emptyStateEmoji
 	const emojiMatch = title?.match(/(\p{Emoji})/u)
 	return emojiMatch ? emojiMatch[0] : fallback
@@ -274,7 +243,7 @@ export function getEmojiFromTitle(title: string | undefined | null, defaultEmoji
  * @returns Image data
  */
 export function getPostImageData(post: ProcessedPost | null | undefined): PostImage {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	if (!post?.metadata?.fm) { return { src: '', alt: 'Blog post' } }
 
 	const src = post.metadata.fm.thumbnail?.src ||
@@ -588,7 +557,7 @@ export async function loadCategoryDescriptions(lang = 'en'): Promise<Record<stri
  * @returns Localized URL with language prefix if needed
  */
 export function localizeUrl(url: string): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	// Skip if i18n is not enabled or includeLanguageInURL is disabled
 	if (!config.i18n?.enabled || !config.i18n.includeLanguageInURL) {
 		return url
@@ -605,7 +574,7 @@ export function localizeUrl(url: string): string {
  * @returns Relative URL to the post
  */
 export function getPostUrl(post: ProcessedPost | null | undefined, withLanguage = false): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	if (!post?.urlPath) { return withLanguage ? _localizeUrl(config.uri) : config.uri }
 	const url = `${ config.uri }${ post.urlPath }`
 	return withLanguage ? _localizeUrl(url) : url
@@ -618,7 +587,7 @@ export function getPostUrl(post: ProcessedPost | null | undefined, withLanguage 
  * @returns Relative URL to the category
  */
 export function getCategoryUrl(category: string | null | undefined, withLanguage = false): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	if (!category) { return withLanguage ? _localizeUrl(config.uri) : config.uri }
 	const url = `${ config.uri }/category/${ slugify(category) }`
 	return withLanguage ? _localizeUrl(url) : url
@@ -631,7 +600,7 @@ export function getCategoryUrl(category: string | null | undefined, withLanguage
  * @returns Relative URL to the tag
  */
 export function getTagUrl(tag: string | null | undefined, withLanguage = false): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	if (!tag) { return withLanguage ? _localizeUrl(config.uri) : config.uri }
 	const url = `${ config.uri }/tag/${ slugify(tag) }`
 	return withLanguage ? _localizeUrl(url) : url
@@ -644,7 +613,7 @@ export function getTagUrl(tag: string | null | undefined, withLanguage = false):
  * @returns Post excerpt
  */
 export function getPostExcerpt(post: ProcessedPost | null | undefined, maxLength?: number): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const limit = maxLength ?? config.posts.excerptLength
 	if (!post?.metadata?.fm) { return '' }
 
@@ -675,7 +644,7 @@ export function getPostExcerpt(post: ProcessedPost | null | undefined, maxLength
  * @returns Generated URL
  */
 export function getBlogUrl(options: BlogUrlOptions): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const { type, data, withLanguage = false } = options
 
 	switch (type) {
@@ -704,7 +673,7 @@ export function processImagePath(
 	defaultPrefix?: string,
 	fallbackImage = ''
 ): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const prefix = defaultPrefix ?? config.images.defaults.blogPath
 
 	if (!imagePath) {
@@ -737,7 +706,7 @@ export function processImagePath(
  * @returns Processed cover image URL
  */
 export function getCoverImageUrl(post: ProcessedPost | null | undefined, fallbackImage?: string): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const fallback = fallbackImage ?? config.images.defaults.coverImage
 	const rawImage = post?.metadata?.fm?.image?.src || ''
 	return processImagePath(rawImage, config.images.defaults.blogPath, fallback)
@@ -750,7 +719,7 @@ export function getCoverImageUrl(post: ProcessedPost | null | undefined, fallbac
  * @returns Processed author avatar URL
  */
 export function getAuthorAvatarUrl(post: ProcessedPost | null | undefined, fallbackImage?: string): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const fallback = fallbackImage ?? config.images.defaults.authorAvatar
 	const avatar = post?.metadata?.fm?.author?.avatar
 	// Fix missing author avatar by using static path
@@ -767,7 +736,7 @@ export function getAuthorAvatarUrl(post: ProcessedPost | null | undefined, fallb
  * @returns Array of category names sorted by frequency (most used first)
  */
 export function getAllCategories(posts: ProcessedPost[], limit?: number): string[] {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const maxCategories = limit ?? config.posts.popularCategoriesCount
 
 	if (!isValidPostArray(posts)) {
@@ -803,7 +772,7 @@ export function getAllCategories(posts: ProcessedPost[], limit?: number): string
  * @returns Array of tag names sorted by frequency (most used first)
  */
 export function getAllTags(posts: ProcessedPost[], limit?: number): string[] {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const maxTags = limit ?? config.posts.popularTagsCount
 
 	if (!isValidPostArray(posts)) {
@@ -833,7 +802,7 @@ export function getAllTags(posts: ProcessedPost[], limit?: number): string[] {
  * @returns Array of the most recent posts
  */
 export function getRecentPosts(posts: ProcessedPost[], count?: number): ProcessedPost[] {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const limit = count ?? config.posts.recentPostsCount
 
 	return posts.slice(0, limit)
@@ -855,7 +824,7 @@ export function getSimilarPosts(
 	currentTags: string[] = [],
 	count?: number
 ): ProcessedPost[] {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const limit = count ?? config.posts.relatedPostsCount
 
 	const otherPosts = allPosts.filter(post => post.path !== currentPostId)
@@ -892,7 +861,7 @@ export function getSimilarPosts(
  * @returns The markdown content without frontmatter
  */
 export async function getMarkdownContent(filePath: string): Promise<string> {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 
 	// Server-side (Node.js) environment
 	if (typeof process !== 'undefined') {
@@ -956,7 +925,7 @@ export async function getMarkdownContent(filePath: string): Promise<string> {
  * @returns Array of processed blog posts
  */
 export async function getAllPosts(options: GetAllPostsOptions = {}): Promise<ProcessedPost[]> {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 	const {
 		lang = 'en',
 		includeContent = false,
@@ -1123,7 +1092,7 @@ export async function getAllPosts(options: GetAllPostsOptions = {}): Promise<Pro
  * @returns Array of popular category names
  */
 export async function getPopularCategories(posts?: ProcessedPost[]): Promise<string[]> {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 
 	if (posts && Array.isArray(posts)) {
 		return getAllCategories(posts)
@@ -1145,7 +1114,7 @@ export async function getPopularCategories(posts?: ProcessedPost[]): Promise<str
  * @returns Array of popular tag names
  */
 export async function getPopularTags(posts?: ProcessedPost[]): Promise<string[]> {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 
 	if (posts && Array.isArray(posts)) {
 		return getAllTags(posts)
@@ -1174,7 +1143,7 @@ export async function getPopularTags(posts?: ProcessedPost[]): Promise<string[]>
  * @throws Error If siteUrl is not provided
  */
 export function generateRssFeed(posts: ProcessedPost[], options: RssFeedOptions): string {
-	const config = blogConfig as unknown as BlogConfigType
+	const config = blogConfig
 
 	if (!options?.siteUrl) {
 		throw new Error('siteUrl is required to generate RSS feed')

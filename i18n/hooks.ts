@@ -8,27 +8,6 @@ import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit'
 import { blogConfig } from '../config.js'
 
 /**
- * Configuration interface for i18n settings
- */
-export interface I18nConfig {
-	enabled: boolean
-	supportedLanguages: string[]
-	defaultLanguage: string
-	includeLanguageInURL: boolean
-	autoDetectLanguage: boolean
-	languageDetectionOrder: string[]
-	persistLanguageKey: string
-}
-
-/**
- * Partial blog configuration interface with fields used in this module
- */
-export interface BlogConfigWithI18n {
-	uri: string
-	i18n?: I18nConfig
-}
-
-/**
  * Handler function type for custom i18n processing
  */
 export type I18nHandler = (event: RequestEvent) => Promise<void> | void
@@ -78,7 +57,7 @@ interface LocalsWithI18n {
  * }
  */
 export async function handleBlogI18n(event: RequestEvent, handler?: I18nHandler): Promise<void> {
-	const config = blogConfig as unknown as BlogConfigWithI18n
+	const config = blogConfig
 
 	// Only run if i18n is enabled and the URL is related to the blog
 	// Using startsWith for path-based check instead of includes for better security
@@ -127,7 +106,7 @@ export async function loadWithBlogI18n<T extends Record<string, unknown>>(
 	event: ServerLoadEvent,
 	originalLoad?: LoadFunction<T>
 ): Promise<T | (T & I18nLoadResult)> {
-	const config = blogConfig as unknown as BlogConfigWithI18n
+	const config = blogConfig
 
 	// Call the original load function if provided and it's a function
 	const originalData: T = (typeof originalLoad === 'function') ?
