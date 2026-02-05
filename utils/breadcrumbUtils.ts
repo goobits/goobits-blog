@@ -5,12 +5,6 @@
 import { blogConfig } from '../config/index.js'
 import { getCategoryUrl } from './blogUtils.js'
 
-// Blog config type for accessing properties
-interface BlogConfigType {
-	name?: string
-	uri?: string
-}
-
 // Post metadata for breadcrumbs
 interface BreadcrumbPostMetadata {
 	title?: string
@@ -58,7 +52,7 @@ export interface BreadcrumbPageData {
  * @returns Breadcrumb configuration for the Breadcrumbs component
  */
 export function generateBreadcrumbs(data: BreadcrumbPageData | null | undefined): BreadcrumbConfig {
-	const config = blogConfig as unknown as BlogConfigType
+	const { name, uri } = blogConfig
 
 	// Default configuration
 	const breadcrumbConfig: BreadcrumbConfig = {
@@ -73,14 +67,14 @@ export function generateBreadcrumbs(data: BreadcrumbPageData | null | undefined)
 	switch (data.pageType) {
 	case 'index':
 		// For blog index, just use the blog title
-		breadcrumbConfig.current = config.name || 'Blog'
+		breadcrumbConfig.current = name
 		break
 
 	case 'post':
 		// For posts, add blog link and use post title
 		if (data.post) {
 			breadcrumbConfig.items = [
-				{ href: config.uri || '/blog', label: config.name || 'Blog' }
+				{ href: uri, label: name }
 			]
 
 			// If post has a category, add it to the breadcrumb path
@@ -99,7 +93,7 @@ export function generateBreadcrumbs(data: BreadcrumbPageData | null | undefined)
 			}
 
 			// Use post title as current
-			breadcrumbConfig.current = data.post.metadata?.fm?.title || 'Post'
+			breadcrumbConfig.current = data.post.metadata?.fm?.title ?? 'Post'
 		}
 		break
 
@@ -107,9 +101,9 @@ export function generateBreadcrumbs(data: BreadcrumbPageData | null | undefined)
 		// For category pages, add blog link and use category name
 		if (data.category) {
 			breadcrumbConfig.items = [
-				{ href: config.uri || '/blog', label: config.name || 'Blog' }
+				{ href: uri, label: name }
 			]
-			breadcrumbConfig.current = data.categoryName || data.category
+			breadcrumbConfig.current = data.categoryName ?? data.category
 		}
 		break
 
@@ -117,9 +111,9 @@ export function generateBreadcrumbs(data: BreadcrumbPageData | null | undefined)
 		// For tag pages, add blog link and use tag name
 		if (data.tag) {
 			breadcrumbConfig.items = [
-				{ href: config.uri || '/blog', label: config.name || 'Blog' }
+				{ href: uri, label: name }
 			]
-			breadcrumbConfig.current = data.tagName || data.tag
+			breadcrumbConfig.current = data.tagName ?? data.tag
 		}
 		break
 

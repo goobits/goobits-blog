@@ -5,7 +5,7 @@
  * Each test justifies its existence by probing for specific failure modes.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
 	slugify,
 	formatDate,
@@ -55,34 +55,35 @@ vi.mock('../config/index.js', () => ({
 	getBlogPostFiles: () => ({})
 }))
 
-// Helper to create test posts
-function createPost(overrides: Partial<{
-	title: string
-	date: string
-	categories: string[]
-	category: string
-	tags: string[]
-	excerpt: string
-	content: string
-	urlPath: string
-	path: string
-}>): ProcessedPost {
-	return {
-		metadata: {
-			fm: {
-				title: overrides.title ?? 'Test Post',
-				date: overrides.date ?? '2024-01-15',
-				categories: overrides.categories,
-				category: overrides.category,
-				tags: overrides.tags,
-				excerpt: overrides.excerpt
-			}
-		},
+// Helper to create test posts with clean optional property handling
+function createPost(overrides: {
+	title?: string
+	date?: string
+	categories?: string[]
+	category?: string
+	tags?: string[]
+	excerpt?: string
+	content?: string
+	urlPath?: string
+	path?: string
+} = {}): ProcessedPost {
+	const fm: ProcessedPost['metadata']['fm'] = {
+		title: overrides.title ?? 'Test Post',
+		date: overrides.date ?? '2024-01-15'
+	}
+	if (overrides.categories) { fm.categories = overrides.categories }
+	if (overrides.category) { fm.category = overrides.category }
+	if (overrides.tags) { fm.tags = overrides.tags }
+	if (overrides.excerpt) { fm.excerpt = overrides.excerpt }
+
+	const post: ProcessedPost = {
+		metadata: { fm },
 		date: overrides.date ?? '2024-01-15',
 		urlPath: overrides.urlPath ?? '/2024/01/test-post',
 		path: overrides.path ?? '/content/Blog/2024/01/test-post.md',
-		content: overrides.content
+		content: overrides.content ?? ''
 	}
+	return post
 }
 
 describe('slugify', () => {
@@ -173,7 +174,6 @@ describe('getPostExcerpt', () => {
 	it('strips HTML tags from content when generating excerpt', () => {
 		// Bug: HTML tags in excerpts break rendering or cause XSS
 		const post = createPost({
-			excerpt: undefined,
 			content: '<p>Hello <strong>world</strong></p><script>alert("xss")</script>'
 		})
 		const excerpt = getPostExcerpt(post)
@@ -185,7 +185,6 @@ describe('getPostExcerpt', () => {
 	it('strips markdown formatting from content', () => {
 		// Bug: Markdown symbols like **bold** appear in excerpts
 		const post = createPost({
-			excerpt: undefined,
 			content: '# Heading\n**bold** and *italic* and `code`'
 		})
 		const excerpt = getPostExcerpt(post)
@@ -197,7 +196,6 @@ describe('getPostExcerpt', () => {
 	it('truncates at word boundary, not mid-word', () => {
 		// Bug: "extraordinarily" could become "extraordinar..." mid-word
 		const post = createPost({
-			excerpt: undefined,
 			content: 'This is a test with extraordinarily long words that should not be cut mid-word'
 		})
 		const excerpt = getPostExcerpt(post, 30)

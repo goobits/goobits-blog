@@ -31,13 +31,6 @@ export interface ReadTimePost {
 	content?: string
 }
 
-// Blog config type for accessing nested properties
-interface BlogConfigWithPosts {
-	posts?: {
-		readTime?: Partial<ReadTimeConfig>
-	}
-}
-
 // Default configuration that can be used without dependency on blogConfig
 export const DEFAULT_READ_TIME_CONFIG: ReadTimeConfig = {
 	wordsPerMinute: 225,
@@ -95,9 +88,8 @@ function validateType(value: unknown, type: ValidTypeName, name: string, isOptio
  * @returns The default read time in minutes
  */
 function getDefaultTime(options: Partial<ReadTimeConfig> = {}): number {
-	const config = blogConfig as unknown as BlogConfigWithPosts
 	return options.defaultTime ??
-		config?.posts?.readTime?.defaultTime ??
+		blogConfig.posts.readTime.defaultTime ??
 		DEFAULT_READ_TIME_CONFIG.defaultTime
 }
 
@@ -120,10 +112,9 @@ export function calculateReadTime(content: string, options: Partial<ReadTimeConf
 		// 1. Provided options
 		// 2. blogConfig (if available)
 		// 3. DEFAULT_READ_TIME_CONFIG
-		const configFromBlog = blogConfig as unknown as BlogConfigWithPosts
 		const config: ReadTimeConfig = {
 			...DEFAULT_READ_TIME_CONFIG,
-			...(configFromBlog?.posts?.readTime || {}),
+			...blogConfig.posts.readTime,
 			...options
 		}
 
@@ -204,10 +195,9 @@ export function getPostReadTime(post: ReadTimePost | null | undefined, options: 
 
 		// If we have an excerpt, use that to estimate (multiply by 3 for approximation)
 		if (post?.metadata?.fm?.excerpt) {
-			const configFromBlog = blogConfig as unknown as BlogConfigWithPosts
 			const config: ReadTimeConfig = {
 				...DEFAULT_READ_TIME_CONFIG,
-				...(configFromBlog?.posts?.readTime || {}),
+				...blogConfig.posts.readTime,
 				...options
 			}
 
