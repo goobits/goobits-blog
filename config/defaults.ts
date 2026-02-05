@@ -218,7 +218,7 @@ export const defaultBlogConfig: BlogConfig = {
 
 	// --- Versioning ---
 	version: '1.2.0',
-	lastUpdated: '2025-05-17',
+	lastUpdated: '2026-02-05',
 
 	// --- Content & Structure ---
 	posts: {
